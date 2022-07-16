@@ -1,17 +1,16 @@
 <template>
-    <ContentField>
-        pk
-    </ContentField>
+    <PlayGround>
+    </PlayGround>
 </template>
 
 
 <script>
-import ContentField from '../../components/ContentField';
+import PlayGround from '../../components/PlayGround';
 
 export default {
     name: 'PkIndexView',
     components: {
-        ContentField,
+        PlayGround,
     }
 }
 </script>
