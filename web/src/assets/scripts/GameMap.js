@@ -1,4 +1,5 @@
 import { AcGameObject } from "./AcGameObject";
+import { Snake } from "./Snake";
 import { Wall } from "./Wall";
 
 
@@ -13,6 +14,21 @@ export class GameMap extends AcGameObject {
 
         this.inner_walls_count = 40;
         this.walls = [];
+
+        this.snakes = [
+            new Snake({
+                id: 0,
+                color: '#4876EC',
+                r: this.rows - 2,
+                c: 1
+            }, this),
+            new Snake({
+                id: 1,
+                color: '#F94848',
+                r: 1,
+                c: this.cols - 2,
+            }, this)
+        ];
     }
     start() {//只执行一次
         for (let i = 0; i < 1000; i++) {//如果生成的是不连通的，会return false，然后重新生成一次。
@@ -66,7 +82,7 @@ export class GameMap extends AcGameObject {
             for (let j = 0; j < 1000; j++) {
                 let r = parseInt(Math.random() * this.rows);//Math.randow()是[0,1)
                 let c = parseInt(Math.random() * this.cols);
-                if (g[r][c] || g[c][r]) {//因为放置障碍物的时候是对称来放的，所以两个点都判断一下
+                if (g[r][c] || g[this.rows - 1 - r][this.cols - 1 - c]) {//因为放置障碍物的时候是对称来放的，所以两个点都判断一下
                     continue;
                 }
                 if (r == (this.rows - 2) && c == 1) {
@@ -75,7 +91,7 @@ export class GameMap extends AcGameObject {
                 if (r == 1 && c == this.cols - 2) {
                     continue;
                 }
-                g[r][c] = g[c][r] = true;
+                g[r][c] = g[this.rows - 1 - r][this.cols - 1 - c] = true;
                 break;
             }
         }
