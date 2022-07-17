@@ -16,6 +16,12 @@
                         <router-link :class="route_name == 'ranklist_index' ? 'nav-link active' : 'nav-link'"
                             :to="{ name: 'ranklist_index' }">排行榜</router-link>
                     </li>
+
+                    <!-- <li class="nav-item">
+                        <router-link :class="route_name == 'ranklist_index' ? 'nav-link active' : 'nav-link'"
+                            :to="{ name: 'ranklist_index' }">ii</router-link>
+                    </li> -->
+
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
@@ -34,6 +40,7 @@
                         </ul>
                     </li>
                 </ul>
+
             </div>
         </div>
     </nav>
