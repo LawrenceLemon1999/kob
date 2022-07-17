@@ -38,7 +38,22 @@ export class GameMap extends AcGameObject {
         }
     }
 
-    //用flood-fill算法判断连通性
+
+    check_ready() {//判断两个蛇是否已经准备好（两条蛇都获取了下一步的操作之后）
+        for (const snake of this.snakes) {
+            if (snake.status !== 'idle') return false;//如果不是静止，那就不能动
+            if (snake.direction === -1) return false;//如果蛇的方向没有确定，那也不能动
+        }
+        return true;
+    }
+    next_step() {
+        for (const snake of this.snakes) {//如果棋盘判断可以进入下一回合，会调用两条蛇也进入下一回合
+            snake.next_step();
+        }
+    }
+
+
+    //用flood-fill算法判断连通性，两个蛇直接有没有路
     check_connnectivity(g, sx, sy, tx, ty) {
         if (sx == tx && sy == ty) {
             return true;
@@ -57,6 +72,7 @@ export class GameMap extends AcGameObject {
     }
 
 
+    //制造障碍物
     create_walls() {
         // new Wall(0, 0, this);
         const g = [];//g是一个数组
@@ -129,6 +145,9 @@ export class GameMap extends AcGameObject {
     }
     update() {//除了第一帧，每一帧都调用一次
         this.update_size();
+        if (this.check_ready()) {//两个蛇准备好之后，开启下一回合
+            this.next_step();
+        }
         this.render();
     }
     render() {
