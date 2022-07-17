@@ -11,20 +11,72 @@ export class GameMap extends AcGameObject {
         this.rows = 13;
         this.cols = 13;
 
+        this.inner_walls_count = 80;
         this.walls = [];
     }
     start() {//只执行一次
         this.create_walls();
     }
     create_walls() {
-        new Wall(0, 0, this);
+        // new Wall(0, 0, this);
+        const g = [];//g是一个数组
+        for (let r = 0; r < this.rows; r++) {
+            g[r] = [];//g[r]=一个数组
+            for (let c = 0; c < this.cols; c++) {
+                g[r][c] = false;
+            }
+        }
+
+        //给四周加上墙
+        for (let r = 0; r < this.rows; r++) {
+            g[r][0] = true;
+            g[r][this.cols - 1] = true;
+        }
+        for (let c = 0; c < this.cols; c++) {
+            g[0][c] = true;
+            g[this.rows - 1][c] = true;
+        }
+
+        //创建随机障碍物
+        for (let i = 0; i < this.inner_walls_count / 2; i++) {
+            for (let j = 0; j < 1000; j++) {
+                let r = parseInt(Math.random() * this.rows);//Math.randow()是[0,1)
+                let c = parseInt(Math.random() * this.cols);
+                if (g[r][c] || g[c][r]) {//因为放置障碍物的时候是对称来放的，所以两个点都判断一下
+                    continue;
+                }
+                if (r == (this.rows - 2) && c == 1) {
+                    continue;
+                }
+                if (r == 1 && c == this.cols - 2) {
+                    continue;
+                }
+                g[r][c] = g[c][r] = true;
+                break;
+            }
+        }
+
+
+        //给障碍物上色
+
+        //为什么障碍物的颜色会覆盖地图的颜色呢？
+        //因为每个Wall都会被push到AC_GAME_OBJECTS里，然后按照先push进去先update的顺序去上色，
+        //地图比Wall先push进去，所以Wall的颜色会覆盖掉地图的颜色
+        for (let r = 0; r < this.rows; r++) {
+            for (let c = 0; c < this.cols; c++) {
+                if (g[r][c]) {
+                    this.walls.push(new Wall(r, c, this));
+                }
+            }
+        }
+
     }
     update_size() {//计算小正方形的边长
         //clientWidth函数获取 div 元素的宽度，包含内边距（padding）
         //下面的计算方式保证了取到的正方形是在特定长宽下的最大的正方形（并且没有越界的）视频1h10min左右
-        this.L = (Math.min(this.parent.clientWidth / this.cols, this.parent.clientHeight / this.rows));
+        // this.L = (Math.min(this.parent.clientWidth / this.cols, this.parent.clientHeight / this.rows));
 
-        // this.L = parseInt(Math.min(this.parent.clientWidth / this.cols, this.parent.clientHeight / this.rows));
+        this.L = parseInt(Math.min(this.parent.clientWidth / this.cols, this.parent.clientHeight / this.rows));
         this.ctx.canvas.width = this.L * this.cols;
         this.ctx.canvas.height = this.L * this.rows;
     }
