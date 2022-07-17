@@ -32,7 +32,7 @@ div.gamemap {
     width: 100%;
     height: 100%;
     display: flex;
-    /* flex限制这个div内部的元素的位置 */
+    /* flex限制这个div内部的元素的位置 flex比较好实现竖直和水平居中，margin比较适合实现水平居中*/
     justify-content: center;
     /* 水平居中 */
     align-items: center;
