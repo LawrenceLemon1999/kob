@@ -11,12 +11,36 @@ export class GameMap extends AcGameObject {
         this.rows = 13;
         this.cols = 13;
 
-        this.inner_walls_count = 80;
+        this.inner_walls_count = 40;
         this.walls = [];
     }
     start() {//只执行一次
-        this.create_walls();
+        for (let i = 0; i < 1000; i++) {//如果生成的是不连通的，会return false，然后重新生成一次。
+            if (this.create_walls()) {
+                break;
+            }
+        }
     }
+
+    //用flood-fill算法判断连通性
+    check_connnectivity(g, sx, sy, tx, ty) {
+        if (sx == tx && sy == ty) {
+            return true;
+        }
+        g[sx][sy] = true;//标记当前点已经走过
+        let dx = [-1, 0, 1, 0];
+        let dy = [0, 1, 0, -1];
+        for (let i = 0; i < 4; i++) {
+            let x = sx + dx[i];
+            let y = sy + dy[i];
+            if (!g[x][y] && this.check_connnectivity(g, x, y, tx, ty)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     create_walls() {
         // new Wall(0, 0, this);
         const g = [];//g是一个数组
@@ -57,6 +81,13 @@ export class GameMap extends AcGameObject {
         }
 
 
+        //判断是否联通
+        const copy_g = JSON.parse(JSON.stringify(g));//生成一个g的复制，生成方法是先json化再解析json。
+        if (!this.check_connnectivity(copy_g, this.rows - 2, 1, 1, this.cols - 2)) {
+            return false;
+        }
+
+
         //给障碍物上色
 
         //为什么障碍物的颜色会覆盖地图的颜色呢？
@@ -69,7 +100,7 @@ export class GameMap extends AcGameObject {
                 }
             }
         }
-
+        return true;
     }
     update_size() {//计算小正方形的边长
         //clientWidth函数获取 div 元素的宽度，包含内边距（padding）
