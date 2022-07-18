@@ -10,7 +10,7 @@ export class Snake extends AcGameObject {
 
         this.cells = [new Cell(info.r, info.c)];
         //cells是放着Cell类型的数组，初始的时候只有一个Cell，也就是蛇头cells[0]
-        this.speed = 1;
+        this.speed = 5;
 
         this.direction = -1//表示蛇的下一步的指令，-1表示没有指令，0,1,2,3表示上右下左
         this.status = "idle"//idle表示静止，move表示正在运动，die表示死亡。
@@ -132,6 +132,20 @@ export class Snake extends AcGameObject {
         //给蛇全是圆形的身体加上个矩形，更好看
         //视频2,1h  很重要！！！
 
+        for (let i = 1; i < this.cells.length; i++) {
+            const a = this.cells[i];
+            const b = this.cells[i - 1];
+            if (Math.abs(a.x - b.x) < this.eps && Math.abs(a.y - b.y) < this.eps) {
+                continue;
+            }
+            if (Math.abs(a.x - b.x) < this.eps) {//处理竖直方向相邻两个圆的情况
+                ctx.fillRect((a.x - 0.5) * L, Math.min(a.y, b.y) * L, L, Math.abs(a.y - b.y) * L);
+                //矩形的起始位置的坐标，以及x，y方向的长度
+            }
+            else {//处理水平方向相邻两个圆的情况
+                ctx.fillRect(Math.min(a.x, b.x) * L, (a.y - 0.5) * L, Math.abs(a.x - b.x) * L, L);
+            }
+        }
 
 
 
