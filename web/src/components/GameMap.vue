@@ -1,8 +1,8 @@
 <template>
     <div ref="parent" class="gamemap">
         <!-- ref= "parent" 这样上面的这个div就和下面的parent联系上了-->
-        <canvas ref="canvas">
-
+        <canvas ref="canvas" tabindex="0">
+            <!-- 加入tabindex这个属性就可以读取用户的键盘操作了 -->
         </canvas>
     </div>
 </template>

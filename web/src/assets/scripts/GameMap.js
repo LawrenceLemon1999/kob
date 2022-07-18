@@ -10,7 +10,7 @@ export class GameMap extends AcGameObject {
         this.parent = parent;
         this.L = 0;//存每个格子的绝对距离
         this.rows = 13;
-        this.cols = 13;
+        this.cols = 14;
 
         this.inner_walls_count = 40;
         this.walls = [];
@@ -36,7 +36,25 @@ export class GameMap extends AcGameObject {
                 break;
             }
         }
+        this.add_listening_events();
     }
+
+    add_listening_events() {//canvas绑定键盘事件
+        this.ctx.canvas.focus();//想获取键盘输入首先得聚焦
+
+        const [snake0, snake1] = this.snakes;
+        this.ctx.canvas.addEventListener("keydown", e => {
+            if (e.key === 'w') snake0.set_direction(0);
+            else if (e.key === 'd') snake0.set_direction(1);
+            else if (e.key === 's') snake0.set_direction(2);
+            else if (e.key === 'a') snake0.set_direction(3);
+            else if (e.key === 'ArrowUp') snake1.set_direction(0);
+            else if (e.key === 'ArrowRight') snake1.set_direction(1);
+            else if (e.key === 'ArrowDown') snake1.set_direction(2);
+            else if (e.key === 'ArrowLeft') snake1.set_direction(3);
+        });
+    }
+
 
 
     check_ready() {//判断两个蛇是否已经准备好（两条蛇都获取了下一步的操作之后）
