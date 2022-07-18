@@ -57,6 +57,10 @@ export class Snake extends AcGameObject {
             //this.cells[i] = this.cells[i - 1];不能这样写，需要深层复制，这样写引用会出问题
             this.cells[i] = JSON.parse(JSON.stringify(this.cells[i - 1]));//这样写会创建一个新的对象
         }
+        if (!this.gamemap.check_valid(this.next_cell)) {//目标点是障碍物或者蛇的身体，蛇头碰到这种点，瞬间去世
+            this.status = 'die';
+        }
+
     }
 
     update_move() {
@@ -121,6 +125,9 @@ export class Snake extends AcGameObject {
         const L = this.gamemap.L;
         const ctx = this.gamemap.ctx;
         ctx.fillStyle = this.color;
+        if (this.status === 'die') {
+            ctx.fillStyle = 'white';
+        }
         for (const cell of this.cells) {
             ctx.beginPath();//开启路径
             ctx.arc(cell.x * L, cell.y * L, L / 2 * 0.8, 0, Math.PI * 2);

@@ -70,6 +70,26 @@ export class GameMap extends AcGameObject {
         }
     }
 
+    check_valid(cell) {//检测目标位置是否合法：蛇是否撞到墙或者障碍物或者另一条蛇
+        for (const wall of this.walls) {
+            if (wall.r === cell.r && wall.c === cell.c) {
+                return false;
+            }
+        }
+        for (const snake of this.snakes) {
+            //对于蛇尾需要特判一下，因为如果是蛇头追蛇尾的情况下，如果蛇尾要缩，那么就可以继续追，如果蛇尾不缩，就不能再追了（不然就碰到了）
+            let k = snake.cells.length;
+            if (!snake.check_tail_increasing()) {//如果蛇增长，那么蛇尾会前进，当前蛇尾所在的点就会空出来，就不要判断cell会不会碰到这个空出来的点了
+                k--;
+            }
+            for (let i = 0; i < k; i++) {
+                if (snake.cells[i].r === cell.r && snake.cells[i].c === cell.c)
+                    return false;
+            }
+        }
+        return true;
+    }
+
 
     //用flood-fill算法判断连通性，两个蛇直接有没有路
     check_connnectivity(g, sx, sy, tx, ty) {
