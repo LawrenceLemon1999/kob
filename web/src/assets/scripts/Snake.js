@@ -10,7 +10,7 @@ export class Snake extends AcGameObject {
 
         this.cells = [new Cell(info.r, info.c)];
         //cells是放着Cell类型的数组，初始的时候只有一个Cell，也就是蛇头cells[0]
-        this.speed = 5;
+        this.speed = 1;
 
         this.direction = -1//表示蛇的下一步的指令，-1表示没有指令，0,1,2,3表示上右下左
         this.status = "idle"//idle表示静止，move表示正在运动，die表示死亡。
@@ -29,28 +29,27 @@ export class Snake extends AcGameObject {
     start() {
 
     }
-    // next_step() {  // 将蛇的状态变为走下一步
-    //     const d = this.direction;
-    //     this.next_cell = new Cell(this.cells[0].r + this.dr[d], this.cells[0].c + this.dc[d]);
-    //     this.direction = -1;  // 清空操作
-    //     this.status = "move";
-    //     this.step++;
 
-    //     const k = this.cells.length;
-    //     for (let i = k; i > 0; i--) {
-    //         this.cells[i] = JSON.parse(JSON.stringify(this.cells[i - 1]));
-    //     }
-    // }
+    check_tail_increasing() {//检测当前回合，蛇的长度是否增加。增加的逻辑是前十个回合每回合+1，之后每3回合+1长度
+        if (this.step <= 10 || this.step % 3 === 1) {
+            return true;
+        }
+        return false;
+    }
 
     next_step() {//将蛇的状态变为走下一步
         const d = this.direction;
         this.next_cell = new Cell(this.cells[0].r + this.dr[d], this.cells[0].c + this.dc[d]);
+
+
         this.direction = -1;//方向在使用之后就清空，避免对之后造成影响。
         this.status = 'move';
         this.step++;//回合数+1
 
         const k = this.cells.length;
-        for (let i = k; i > 0; i--) {//每个小球向前移动一位
+        for (let i = k; i > 0; i--) {//每个小球向前移动一位!!!!!!   注意这里：cells[0]和cells[1]重叠了，然后cells[0]再向next_cell移动！
+
+
             //自己的感想：这里注意不要把渲染时候的逻辑和自己记录的数据弄混了
             //渲染的时候雀食是只移动了头和尾，但是自己记录的时候要记录所有cell的移动的
 
@@ -71,21 +70,20 @@ export class Snake extends AcGameObject {
 
         //视频2,48min
         const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < this.eps) {//如果蛇头距离下一个cell的距离小于误差值，我们认为它俩重合了
+        if (distance < this.eps) {//如果蛇头距离下一个cell的距离小于误差值，我们认为它俩重合了,也就是走到目标点了
 
             //到达位置之后，新的位置作为蛇头。
             this.cells[0] = this.next_cell;
 
-
             // console.log("id:  " + this.id + "  " + this.direction + "  " + this.cells.length);
             // console.log("step :" + this.step + "  " + this.cells[0].x + "  " + this.cells[0].y);
             // console.log("next: " + this.next_cell.x + "  " + this.next_cell.y);
-
-
             this.next_cell = null;
             this.status = 'idle';
 
-
+            if (!this.check_tail_increasing()) {//砍掉蛇尾，蛇不变长
+                this.cells.pop();
+            }
         }
         else {
             const move_distance = this.speed * this.timedelta / 1000;//每两帧之间走的距离
@@ -94,24 +92,24 @@ export class Snake extends AcGameObject {
             //这里是计算出来下一帧的时候蛇头的横纵坐标，已知当前速度下从蛇头向目标坐标走的距离是move_distance
             //又已知蛇头向目标坐标走的路线的斜率（或者说角度）：由dx，dy和distance计算得到
             //就知道横纵方向分别走了多远
+
+
+            if (!this.check_tail_increasing()) {//如果这一回合的时候蛇没有增长，那么说明尾巴需要向前一格，
+                //如果蛇增长了，那蛇尾就不用动（然后由于头向前多了一格，整个蛇就多了一格）
+
+                const k = this.cells.length;
+                const tail = this.cells[k - 1];
+                const tail_target = this.cells[k - 2];
+                //这里y总认为tail需要移动的distance和头是一致的，有点不明白。。。。。。。。。。。。？？？？？
+                //不过move_distance是一样的，因为速度和时间间隔是一样的。
+
+                const tail_dx = tail_target.x - tail.x;
+                const tail_dy = tail_target.y - tail.y;
+                tail.x += move_distance * tail_dx / distance;
+                tail.y += move_distance * tail_dy / distance;
+            }
         }
     }
-    // update_move() {
-    //     const dx = this.next_cell.x - this.cells[0].x;
-    //     const dy = this.next_cell.y - this.cells[0].y;
-    //     const distance = Math.sqrt(dx * dx + dy * dy);
-
-    //     if (distance < this.eps) {  // 走到目标点了
-    //         this.cells[0] = this.next_cell;  // 添加一个新蛇头
-    //         this.next_cell = null;
-    //         this.status = "idle";  // 走完了，停下来
-    //     } else {
-    //         const move_distance = this.speed * this.timedelta / 1000;  // 每两帧之间走的距离
-    //         this.cells[0].x += move_distance * dx / distance;
-    //         this.cells[0].y += move_distance * dy / distance;
-    //     }
-    // }
-
 
     update() {//每一帧执行一次
         if (this.status === 'move') {
@@ -130,6 +128,14 @@ export class Snake extends AcGameObject {
             //四五参数是起始角度和终止角度
             ctx.fill();
         }
+
+        //给蛇全是圆形的身体加上个矩形，更好看
+        //视频2,1h  很重要！！！
+
+
+
+
+
     }
 
     set_direction(q) {//设置蛇的运动方向
