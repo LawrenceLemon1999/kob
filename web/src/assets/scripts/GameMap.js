@@ -12,7 +12,7 @@ export class GameMap extends AcGameObject {
         this.rows = 13;
         this.cols = 14;
 
-        this.inner_walls_count = 40;
+        this.inner_walls_count = 10;
         this.walls = [];
 
         this.snakes = [

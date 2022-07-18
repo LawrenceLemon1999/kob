@@ -25,6 +25,29 @@ export class Snake extends AcGameObject {
 
         this.step = 0;//表示回合数
         this.eps = 1e-2;//允许的误差，当两个点的距离小于这个误差值的时候，就默认它们俩重合了
+
+
+        this.eye_direction = 0;
+        if (this.id === 1) {
+            this.eye_direction = 2;//左下角的蛇的眼睛初始朝上。右上角的蛇眼睛朝下
+        }
+
+
+        //视频2,1h19min  对于蛇眼睛的偏移量
+        this.eye_dx = [  // 蛇眼睛不同方向的x的偏移量
+            [-1, 1],
+            [1, 1],
+            [1, -1],
+            [-1, -1],
+        ];
+        this.eye_dy = [  // 蛇眼睛不同方向的y的偏移量
+            [-1, -1],
+            [-1, 1],
+            [1, 1],
+            [1, -1],
+        ]
+
+
     }
     start() {
 
@@ -40,7 +63,7 @@ export class Snake extends AcGameObject {
     next_step() {//将蛇的状态变为走下一步
         const d = this.direction;
         this.next_cell = new Cell(this.cells[0].r + this.dr[d], this.cells[0].c + this.dc[d]);
-
+        this.eye_direction = d;//更新蛇眼的方向 
 
         this.direction = -1;//方向在使用之后就清空，避免对之后造成影响。
         this.status = 'move';
@@ -154,7 +177,14 @@ export class Snake extends AcGameObject {
             }
         }
 
-
+        ctx.fillStyle = 'black';
+        for (let i = 0; i < 2; i++) {
+            const eye_x = (this.cells[0].x + this.eye_dx[this.eye_direction][i] * 0.15) * L;
+            const eye_y = (this.cells[0].y + this.eye_dy[this.eye_direction][i] * 0.15) * L;
+            ctx.beginPath();
+            ctx.arc(eye_x, eye_y, L * 0.05, 0, Math.PI * 2);
+            ctx.fill();
+        }
 
 
     }
