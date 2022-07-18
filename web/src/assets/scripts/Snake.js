@@ -123,7 +123,7 @@ export class Snake extends AcGameObject {
         ctx.fillStyle = this.color;
         for (const cell of this.cells) {
             ctx.beginPath();//开启路径
-            ctx.arc(cell.x * L, cell.y * L, L / 2, 0, Math.PI * 2);
+            ctx.arc(cell.x * L, cell.y * L, L / 2 * 0.8, 0, Math.PI * 2);
             //前两个参数是圆心坐标（对于canvas来说的坐标），第三个参数是半径
             //四五参数是起始角度和终止角度
             ctx.fill();
@@ -139,11 +139,11 @@ export class Snake extends AcGameObject {
                 continue;
             }
             if (Math.abs(a.x - b.x) < this.eps) {//处理竖直方向相邻两个圆的情况
-                ctx.fillRect((a.x - 0.5) * L, Math.min(a.y, b.y) * L, L, Math.abs(a.y - b.y) * L);
+                ctx.fillRect((a.x - 0.4) * L, Math.min(a.y, b.y) * L, L * 0.8, Math.abs(a.y - b.y) * L);
                 //矩形的起始位置的坐标，以及x，y方向的长度
             }
             else {//处理水平方向相邻两个圆的情况
-                ctx.fillRect(Math.min(a.x, b.x) * L, (a.y - 0.5) * L, Math.abs(a.x - b.x) * L, L);
+                ctx.fillRect(Math.min(a.x, b.x) * L, (a.y - 0.4) * L, Math.abs(a.x - b.x) * L, L * 0.8);
             }
         }
 
