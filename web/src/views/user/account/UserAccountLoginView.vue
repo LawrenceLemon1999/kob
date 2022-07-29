@@ -3,19 +3,24 @@
         <!-- 这里是bootstrap里的grids，把界面分成12份 -->
         <div class="row justify-content-md-center">
             <div class="col-3">
-                <div class="mb-3">
-                    <!-- 这里是前端的内容，这俩是要同时出现的，上面的for和下面的id是对应的 -->
-                    <label for="username" class="form-label">用户名</label>
-                    <input type="text" class="form-control" id="username" placeholder="请输入用户名">
-                </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">密码</label>
-                    <input type="password" class="form-control" id="password" placeholder="请输入密码">
-                </div>
-                <div class="error-message">
-                    密码错误
-                </div>
-                <button type="submit" class="btn btn-primary">提交</button>
+
+                <!-- 阻止默认的提交行为 -->
+                <form @submit.prevent="login">
+                    <div class="mb-3">
+                        <!-- 这里是前端的内容，这俩是要同时出现的，上面的for和下面的id是对应的 -->
+                        <label for="username" class="form-label">用户名</label>
+                        <input v-model="username" type="text" class="form-control" id="username" placeholder="请输入用户名">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">密码</label>
+                        <input v-model="password" type="password" class="form-control" id="password"
+                            placeholder="请输入密码">
+                    </div>
+                    <div class="error-message">
+                        {{ error_message }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">提交</button>
+                </form>
             </div>
         </div>
 
@@ -26,11 +31,39 @@
 
 <script>
 import ContentField from '@/components/ContentField.vue'
+import { useStore } from 'vuex'
+import { ref } from 'vue'
 
 export default {
     name: 'UserAccountLoginView',
     components: {
         ContentField,
+    },
+    setup() {
+        const store = useStore();
+        let username = ref("");
+        let password = ref("");
+        let error_message = ref("");
+        const login = () => {
+            //调用vuex的actions里的函数要用dispatch
+            store.dispatch("login", {
+                username: username.value,
+                password: password.value,
+                success(resp) {
+                    console.log(resp);
+                },
+                erroe(resp) {
+                    console.log(resp);
+                }
+            })
+        }
+
+        return {
+            username,
+            password,
+            error_message,
+            login,
+        }
     }
 }
 </script>
