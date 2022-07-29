@@ -33,9 +33,6 @@ export default ({
                 },
                 success(resp) {
                     //想要调用mutations里的函数，需要用commit
-                    console.log("----");
-                    console.log(resp);
-
                     if (resp.error_message === "success") {
                         context.commit("updateToken", resp.token);
                         data.success(resp);
