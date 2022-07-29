@@ -10,7 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 
 @Data
-@AllArgsConstructor
+@AllArgsConstructor  //因为有这个有参构造函数的注解，所以才能在
+                    // UserDetailsServiceImpl里return new UserDetailsImpl(user);
 @NoArgsConstructor
 public class UserDetailsImpl implements UserDetails {
     private User user;
