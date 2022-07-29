@@ -4,6 +4,8 @@ import PkIndexView from '../views/pk/PkIndexView';
 import RecordIndexView from '../views/record/RecordIndexView';
 import RanklistIndexView from '../views/ranklist/RanklistIndexView';
 import UserBotIndexView from '../views/user/bot/UserBotIndexView';
+import UserAccountLoginView from '../views/user/account/UserAccountLoginView';
+import UserAccountRegisterView from '../views/user/account/UserAccountRegisterView';
 
 
 const routes = [
@@ -38,10 +40,22 @@ const routes = [
   },
 
   {
+    path: '/user/account/login/',
+    name: 'user_account_login',
+    component: UserAccountLoginView,
+  },
+  {
+    path: '/user/account/register/',
+    name: 'user_account_register',
+    component: UserAccountRegisterView,
+  },
+
+  {
     path: '/404/',
     name: '404',
     component: NotFound,
   },
+
   {
     path: '/:catchAll(.*)',
     redirect: '/404/',

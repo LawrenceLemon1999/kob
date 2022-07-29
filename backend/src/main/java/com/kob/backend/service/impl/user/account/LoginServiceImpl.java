@@ -33,7 +33,6 @@ public class LoginServiceImpl implements LoginService {
         UserDetailsImpl loginUser=(UserDetailsImpl) authenticate.getPrincipal();
         User user =loginUser.getUser();
 
-
         //4.将userid封装成jwt-token
         String jwt = JwtUtil.createJWT(user.getId().toString());
 
