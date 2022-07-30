@@ -42,6 +42,7 @@ export default ({
                 success(resp) {
                     //想要调用mutations里的函数，需要用commit
                     if (resp.error_message === "success") {
+                        localStorage.setItem("jwt_token", resp.token);
                         context.commit("updateToken", resp.token);
                         data.success(resp);
                     }
@@ -81,6 +82,7 @@ export default ({
             });
         },
         logout(context) {
+            localStorage.removeItem("jwt_token");
             context.commit("logout");
         }
     },

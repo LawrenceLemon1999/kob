@@ -1,5 +1,5 @@
 <template>
-    <ContentField>
+    <ContentField v-if="show_content">
         <!-- 这里是bootstrap里的grids，把界面分成12份 -->
         <div class="row justify-content-md-center">
             <div class="col-3">
@@ -45,6 +45,25 @@ export default {
         let username = ref("");
         let password = ref("");
         let error_message = ref("");
+        let show_content = ref(false);
+
+        const jwt_token = localStorage.getItem("jwt_token");
+        if (jwt_token) {
+            store.commit("updateToken", jwt_token);
+            store.dispatch("getinfo", {//如果调用getinfo成功，说明登录成功了，那么就调用回调函数跳转到home页面
+                success() {
+                    router.push({ name: "home" });
+                },
+                error() {
+                    show_content.value = true;
+                }
+            });
+        }
+        else {
+            show_content.value = true;
+        }
+
+
         const login = () => {
             error_message.value = "";//提交之后要记得清空报错，不然影响观感
 
@@ -72,6 +91,7 @@ export default {
             password,
             error_message,
             login,
+            show_content,
         }
     }
 }
