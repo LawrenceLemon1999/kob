@@ -33,6 +33,12 @@ export default ({
         }
     },
 
+    //mutation里的操作都不是异步的，action是
+    //比如下面的ajax需要和server通信，有个等待时间，浏览器在等待的时候可以先去执行别的函数，这就是异步。
+    //action不能直接修改state
+    //调用mutation的方法是使用commit，调用actions里的方法是用dispatch
+    //同步的操作放在mutations里，异步的放在actions里
+
     //同步的操作放在mutations里，异步的放在actions里
     actions: {
         login(context, data) {
