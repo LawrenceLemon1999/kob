@@ -1,5 +1,8 @@
 <template>
-    <ContentField v-if="show_content">
+    <ContentField v-if="!$store.state.user.pulling_info">
+        <!-- <ContentField> -->
+
+        <!-- 如果正在拉取信息的话， 就先不要展示登录界面 -->
         <!-- 这里是bootstrap里的grids，把界面分成12份 -->
         <div class="row justify-content-md-center">
             <div class="col-3">
@@ -45,7 +48,6 @@ export default {
         let username = ref("");
         let password = ref("");
         let error_message = ref("");
-        let show_content = ref(false);
 
         const jwt_token = localStorage.getItem("jwt_token");
         if (jwt_token) {
@@ -53,14 +55,15 @@ export default {
             store.dispatch("getinfo", {//如果调用getinfo成功，说明登录成功了，那么就调用回调函数跳转到home页面
                 success() {
                     router.push({ name: "home" });
+                    store.commit("updatePullingInfo", false);
                 },
                 error() {
-                    show_content.value = true;
+                    store.commit("updatePullingInfo", false);
                 }
             });
         }
         else {
-            show_content.value = true;
+            store.commit("updatePullingInfo", false);
         }
 
 
@@ -91,7 +94,6 @@ export default {
             password,
             error_message,
             login,
-            show_content,
         }
     }
 }

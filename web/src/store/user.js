@@ -7,6 +7,7 @@ export default ({
         photo: "",
         token: "",
         is_login: false,
+        pulling_info: true,//表示当前是否在获取信息中，如果是的话，就不要展示登录界面
     },
     getters: {
     },
@@ -26,6 +27,9 @@ export default ({
             state.photo = "";
             state.token = "";
             state.is_login = false;
+        },
+        updatePullingInfo(state, pulling_info) {
+            state.pulling_info = pulling_info;
         }
     },
 
