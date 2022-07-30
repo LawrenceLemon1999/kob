@@ -19,9 +19,17 @@ export default ({
         },
         updateToken(state, token) {
             state.token = token;
+        },
+        logout(state) {
+            state.id = "";
+            state.username = "";
+            state.photo = "";
+            state.token = "";
+            state.is_login = false;
         }
     },
 
+    //同步的操作放在mutations里，异步的放在actions里
     actions: {
         login(context, data) {
             $.ajax({
@@ -45,6 +53,35 @@ export default ({
                     data.error(resp);
                 }
             });
+        },
+        getinfo(context, data) {
+            $.ajax({
+                url: "http://localhost:3000/user/account/info/",
+                type: "GET",
+                headers: {
+                    Authorization: "Bearer " +
+                        context.state.token,
+                },
+                success(resp) {
+                    // console.log(resp);
+                    if (resp.error_message === "success") {
+                        context.commit("updateUser", {
+                            ...resp,//这里是解析resp
+                            is_login: true,
+                        });
+                        data.success(resp);
+                    }
+                    else {
+                        data.error(resp);
+                    }
+                },
+                error(resp) {
+                    data.error(resp);
+                }
+            });
+        },
+        logout(context) {
+            context.commit("logout");
         }
     },
     modules: {

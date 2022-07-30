@@ -33,6 +33,7 @@
 import ContentField from '@/components/ContentField.vue'
 import { useStore } from 'vuex'
 import { ref } from 'vue'
+import router from '../../../router/index'
 
 export default {
     name: 'UserAccountLoginView',
@@ -45,15 +46,22 @@ export default {
         let password = ref("");
         let error_message = ref("");
         const login = () => {
+            error_message.value = "";//提交之后要记得清空报错，不然影响观感
+
             //调用vuex的actions里的函数要用dispatch
             store.dispatch("login", {
                 username: username.value,
                 password: password.value,
-                success(resp) {
-                    console.log(resp);
+                success() {
+                    store.dispatch("getinfo", {
+                        success(resp) {
+                            router.push({ name: "home" });//如果登录成功，跳转到主页面
+                            console.log(store.state.user);
+                            console.log(resp);
+                        }
+                    })
                 },
                 error() {
-                    // console.log(resp);
                     error_message.value = "用户名或密码错误";
                 }
             })
