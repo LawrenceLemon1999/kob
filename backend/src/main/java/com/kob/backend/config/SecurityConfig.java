@@ -7,7 +7,8 @@ import com.kob.backend.config.filter.JwtAuthenticationTokenFilter;
         import org.springframework.http.HttpMethod;
         import org.springframework.security.authentication.AuthenticationManager;
         import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-        import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
         import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
         import org.springframework.security.config.http.SessionCreationPolicy;
         import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -42,6 +43,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated();
 
         http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
+    }
+
+    /*放行websocket的链接*/
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring().antMatchers("/websocket/**");
     }
 }
 

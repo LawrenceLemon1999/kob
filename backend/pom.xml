@@ -109,6 +109,19 @@
             <optional>true</optional> <!-- IntelliJ IDEA本地测试这个true、false热部署都有效 -->
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-websocket -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+            <version>2.7.2</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>2.0.11</version>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>
@@ -118,5 +131,9 @@
             </plugin>
         </plugins>
     </build>
+
+
+
+
 
 </project>
