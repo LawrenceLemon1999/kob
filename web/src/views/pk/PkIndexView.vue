@@ -1,19 +1,24 @@
 <template>
-    <PlayGround>
-
+    <PlayGround v-if="$store.state.pk.status === 'playing'">
+        <!-- 状态是playing的时候才展示对战界面，状态是matching的时候就不展示出来 -->
     </PlayGround>
+    <MatchGround v-if="$store.state.pk.status === 'matching'"></MatchGround>
 </template>
 
 
 <script>
 import PlayGround from '../../components/PlayGround';
+import MatchGround from '@/components/MatchGround';
 import { onMounted, onUnmounted } from 'vue';//分别表示在当前组件挂载之后  和  当前组件卸载之后 运行。 
 import { useStore } from 'vuex';
+
+
 
 export default {
     name: 'PkIndexView',
     components: {
         PlayGround,
+        MatchGround,
     },
     setup() {
         const store = useStore();
@@ -25,6 +30,11 @@ export default {
 
         let socket = null;
         onMounted(() => {
+            store.commit("updateOpponent", {
+                username: "对手",
+                photo: "https://cdn.acwing.com/media/article/image/2022/08/09/1_1db2488f17-anonymous.png",
+            })
+
             socket = new WebSocket(socketUrl);//js自带的类
             socket.onopen = () => {
                 console.log("connected!");
