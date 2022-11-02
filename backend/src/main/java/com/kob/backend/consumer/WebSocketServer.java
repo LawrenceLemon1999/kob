@@ -1,6 +1,7 @@
 package com.kob.backend.consumer;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.kob.backend.consumer.utils.JwtAuthentication;
 import com.kob.backend.mapper.UserMapper;
 import com.kob.backend.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,27 +37,21 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("token") String token) {
+    public void onOpen(Session session, @PathParam("token") String token) throws IOException {
         // 建立连接的时候会调用这个函数
-
         //建立链接的时候，需要把session存下来。
         this.session=session;
         System.out.println("connected");
 
         /*从token里得到用户id，然后通过mapper找到User*/
-        Integer userId= Integer.parseInt(token);
-//        System.out.println("----------");
-//        System.out.println(token);
-//        System.out.println(userId);
+        Integer userId= JwtAuthentication.getUserId(token);//刚才的token是直接传入的userId，现在是正经的token，所以解析一下。
         this.user=userMapper.selectById(userId);
-//        if (this.user != null) {
-        users.put(userId, this);
-//        }
-//        else {
-//            this.session.close();
-//        }
+        if (this.user != null) {
+            users.put(userId, this);
+        } else {
+            this.session.close();
+        }
 
-//        users.put(userId,this);
     }
 
     @OnClose
