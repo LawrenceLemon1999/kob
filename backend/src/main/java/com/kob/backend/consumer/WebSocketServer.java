@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @ServerEndpoint("/websocket/{token}")  // 注意不要以'/'结尾
-public class WebSocketServer {
+    public class WebSocketServer {
 
     /*需要使用线程安全的哈希表去存放公共的变量，公共的变量使用static */
     /* users 存储 用户-链接 之间的对应关系*/
@@ -22,14 +22,14 @@ public class WebSocketServer {
 
     private User user;
 
-    /*每个链接都是使用session来维护的 */
+    /*每个链接都是使用session来维护的  Session是WebSocket里的一个包*/
     private Session session = null;
 
 
     /*websocket里注入mapper的时候，和前面在controller里的注入不太一样*/
     private static UserMapper userMapper;
     @Autowired
-    public static void setUserMapper(UserMapper userMapper) {
+    public void setUserMapper(UserMapper userMapper) {
         WebSocketServer.userMapper = userMapper;
     }
 
@@ -45,7 +45,18 @@ public class WebSocketServer {
 
         /*从token里得到用户id，然后通过mapper找到User*/
         Integer userId= Integer.parseInt(token);
+//        System.out.println("----------");
+//        System.out.println(token);
+//        System.out.println(userId);
         this.user=userMapper.selectById(userId);
+//        if (this.user != null) {
+        users.put(userId, this);
+//        }
+//        else {
+//            this.session.close();
+//        }
+
+//        users.put(userId,this);
     }
 
     @OnClose
