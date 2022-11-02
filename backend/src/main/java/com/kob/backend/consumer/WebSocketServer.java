@@ -1,5 +1,6 @@
 package com.kob.backend.consumer;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.kob.backend.consumer.utils.JwtAuthentication;
 import com.kob.backend.mapper.UserMapper;
@@ -11,7 +12,9 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 @Component
 @ServerEndpoint("/websocket/{token}")  // 注意不要以'/'结尾
@@ -19,7 +22,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
     /*需要使用线程安全的哈希表去存放公共的变量，公共的变量使用static */
     /* users 存储 用户-链接 之间的对应关系*/
-    private static ConcurrentHashMap<Integer,WebSocketServer> users=new ConcurrentHashMap<>();
+    final private static ConcurrentHashMap<Integer,WebSocketServer> users=new ConcurrentHashMap<>();
+
+    /*匹配池 */
+    final private static CopyOnWriteArraySet<User>matchpool=new CopyOnWriteArraySet<>();
+
 
     private User user;
 
@@ -41,6 +48,7 @@ import java.util.concurrent.ConcurrentHashMap;
         // 建立连接的时候会调用这个函数
         //建立链接的时候，需要把session存下来。
         this.session=session;
+
         System.out.println("connected");
 
         /*从token里得到用户id，然后通过mapper找到User*/
@@ -60,12 +68,53 @@ import java.util.concurrent.ConcurrentHashMap;
         System.out.println("disconnected");
         if(this.user!=null){
             users.remove(this.user.getId());
+            matchpool.remove(this.user);
         }
     }
 
+
+    private void startMatching(){
+        System.out.println("start matching");
+        matchpool.add(this.user);
+        while(matchpool.size()>=2){
+            Iterator<User> it=matchpool.iterator();
+            User a=it.next();
+            User b=it.next();
+            matchpool.remove(a);
+            matchpool.remove(b);
+            JSONObject respA=new JSONObject();
+            respA.put("event","start-matching");
+            respA.put("opponent_username",b.getUsername());
+            respA.put("opponent_photo",b.getPhoto());
+            users.get(a.getId()).sendMessage(respA.toJSONString());
+
+            JSONObject respB=new JSONObject();
+            respB.put("event","start-matching");
+            respB.put("opponent_username",a.getUsername());
+            respB.put("opponent_photo",a.getPhoto());
+            users.get(b.getId()).sendMessage(respB.toJSONString());
+
+        }
+    }
+    private void stopMatching(){
+        System.out.println("stop matching");
+
+        matchpool.remove(this.user);
+    }
     @OnMessage
     public void onMessage(String message, Session session) {
+        //作为路由来用，判断交给谁去处理。
         // 从Client接收消息的时候会调用这个函数
+        //把JSON信息给解析出来。
+        JSONObject data=JSONObject.parseObject(message);
+        String event=data.getString("event");
+        if("start-matching".equals(event)){
+            startMatching();
+        }
+        else if("stop-matching".equals(event)){
+            stopMatching();
+        }
+
         System.out.println("receive message");
     }
 

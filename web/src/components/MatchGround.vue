@@ -29,18 +29,27 @@
 
 <script>
 import { ref } from 'vue';
+import { useStore } from 'vuex'
 export default {
     name: 'MatchGround',
     components: {
     },
     setup() {
+        const store = useStore();
+
         let match_btn_info = ref("开始匹配");
         const click_match_btn = () => {
             if (match_btn_info.value === "开始匹配") {
                 match_btn_info.value = "取消";
+                store.state.pk.socket.send(JSON.stringify({
+                    event: "start-matching",
+                }));
             }
             else {
                 match_btn_info.value = "开始匹配";
+                store.state.pk.socket.send(JSON.stringify({
+                    event: "stop-matching",
+                }));
             }
         }
 

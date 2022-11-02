@@ -38,10 +38,18 @@ export default {
             socket = new WebSocket(socketUrl);//js自带的类
             socket.onopen = () => {
                 console.log("connected!");
+                store.commit("updateSocket", socket);
             }
             socket.onmessage = (msg) => {
-                const data = JSON.parse(msg);
-                console.log(data);
+                const data = JSON.parse(msg.data);
+                if (data.event === "start-matching") {//匹配成功
+                    store.commit("updateOpponent", {
+                        username: data.opponent_username,
+                        photo: data.opponent_photo,
+                    });
+                    store.commit("updateStatus", "playing");
+                }
+                // console.log(data);
             }
             socket.onclose = () => {
                 console.log("disconnected");
