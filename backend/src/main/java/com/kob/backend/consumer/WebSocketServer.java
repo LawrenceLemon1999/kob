@@ -2,6 +2,7 @@ package com.kob.backend.consumer;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.kob.backend.consumer.utils.Game;
 import com.kob.backend.consumer.utils.JwtAuthentication;
 import com.kob.backend.mapper.UserMapper;
 import com.kob.backend.pojo.User;
@@ -27,7 +28,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
     /*匹配池 */
     final private static CopyOnWriteArraySet<User>matchpool=new CopyOnWriteArraySet<>();
 
-
+    private Game game =null;//导入属于两位玩家的地图
     private User user;
 
     /*每个链接都是使用session来维护的  Session是WebSocket里的一个包*/
@@ -82,16 +83,22 @@ import java.util.concurrent.CopyOnWriteArraySet;
             User b=it.next();
             matchpool.remove(a);
             matchpool.remove(b);
+
+            Game game=new Game(13,14,20);
+            game.createMap();
+
             JSONObject respA=new JSONObject();
             respA.put("event","start-matching");
             respA.put("opponent_username",b.getUsername());
             respA.put("opponent_photo",b.getPhoto());
+            respA.put("gamemap",game.getG());
             users.get(a.getId()).sendMessage(respA.toJSONString());
 
             JSONObject respB=new JSONObject();
             respB.put("event","start-matching");
             respB.put("opponent_username",a.getUsername());
             respB.put("opponent_photo",a.getPhoto());
+            respB.put("gamemap",game.getG());
             users.get(b.getId()).sendMessage(respB.toJSONString());
 
         }

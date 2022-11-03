@@ -4,9 +4,10 @@ import { Wall } from "./Wall";
 
 
 export class GameMap extends AcGameObject {
-    constructor(ctx, parent) {//ctx是画布，parent是画布的父元素，方便修改画布的长宽
+    constructor(ctx, parent, store) {//ctx是画布，parent是画布的父元素，方便修改画布的长宽
         super();
         this.ctx = ctx;
+        this.store = store;
         this.parent = parent;
         this.L = 0;//存每个格子的绝对距离
         this.rows = 13;
@@ -31,11 +32,12 @@ export class GameMap extends AcGameObject {
         ];
     }
     start() {//只执行一次
-        for (let i = 0; i < 1000; i++) {//如果生成的是不连通的，会return false，然后重新生成一次。
-            if (this.create_walls()) {
-                break;
-            }
-        }
+        // for (let i = 0; i < 1000; i++) {//如果生成的是不连通的，会return false，然后重新生成一次。
+        //     if (this.create_walls()) {
+        //         break;
+        //     }
+        // }
+        this.create_walls();
         this.add_listening_events();
     }
 
@@ -92,71 +94,72 @@ export class GameMap extends AcGameObject {
 
 
     //用flood-fill算法判断连通性，两个蛇直接有没有路
-    check_connnectivity(g, sx, sy, tx, ty) {
-        if (sx == tx && sy == ty) {
-            return true;
-        }
-        g[sx][sy] = true;//标记当前点已经走过
-        let dx = [-1, 0, 1, 0];
-        let dy = [0, 1, 0, -1];
-        for (let i = 0; i < 4; i++) {
-            let x = sx + dx[i];
-            let y = sy + dy[i];
-            if (!g[x][y] && this.check_connnectivity(g, x, y, tx, ty)) {
-                return true;
-            }
-        }
-        return false;
-    }
+    // check_connnectivity(g, sx, sy, tx, ty) {
+    //     if (sx == tx && sy == ty) {
+    //         return true;
+    //     }
+    //     g[sx][sy] = true;//标记当前点已经走过
+    //     let dx = [-1, 0, 1, 0];
+    //     let dy = [0, 1, 0, -1];
+    //     for (let i = 0; i < 4; i++) {
+    //         let x = sx + dx[i];
+    //         let y = sy + dy[i];
+    //         if (!g[x][y] && this.check_connnectivity(g, x, y, tx, ty)) {
+    //             return true;
+    //         }
+    //     }
+    //     return false;
+    // }
 
 
     //制造障碍物
     create_walls() {
         // new Wall(0, 0, this);
-        const g = [];//g是一个数组
-        for (let r = 0; r < this.rows; r++) {
-            g[r] = [];//g[r]=一个数组
-            for (let c = 0; c < this.cols; c++) {
-                g[r][c] = false;
-            }
-        }
+        // const g = [];//g是一个数组
+        // for (let r = 0; r < this.rows; r++) {
+        //     g[r] = [];//g[r]=一个数组
+        //     for (let c = 0; c < this.cols; c++) {
+        //         g[r][c] = false;
+        //     }
+        // }
 
-        //给四周加上墙
-        for (let r = 0; r < this.rows; r++) {
-            g[r][0] = true;
-            g[r][this.cols - 1] = true;
-        }
-        for (let c = 0; c < this.cols; c++) {
-            g[0][c] = true;
-            g[this.rows - 1][c] = true;
-        }
+        // //给四周加上墙
+        // for (let r = 0; r < this.rows; r++) {
+        //     g[r][0] = true;
+        //     g[r][this.cols - 1] = true;
+        // }
+        // for (let c = 0; c < this.cols; c++) {
+        //     g[0][c] = true;
+        //     g[this.rows - 1][c] = true;
+        // }
 
-        //创建随机障碍物
-        for (let i = 0; i < this.inner_walls_count / 2; i++) {
-            for (let j = 0; j < 1000; j++) {
-                let r = parseInt(Math.random() * this.rows);//Math.randow()是[0,1)
-                let c = parseInt(Math.random() * this.cols);
-                if (g[r][c] || g[this.rows - 1 - r][this.cols - 1 - c]) {//因为放置障碍物的时候是对称来放的，所以两个点都判断一下
-                    continue;
-                }
-                if (r == (this.rows - 2) && c == 1) {
-                    continue;
-                }
-                if (r == 1 && c == this.cols - 2) {
-                    continue;
-                }
-                g[r][c] = g[this.rows - 1 - r][this.cols - 1 - c] = true;
-                break;
-            }
-        }
+        // //创建随机障碍物
+        // for (let i = 0; i < this.inner_walls_count / 2; i++) {
+        //     for (let j = 0; j < 1000; j++) {
+        //         let r = parseInt(Math.random() * this.rows);//Math.randow()是[0,1)
+        //         let c = parseInt(Math.random() * this.cols);
+        //         if (g[r][c] || g[this.rows - 1 - r][this.cols - 1 - c]) {//因为放置障碍物的时候是对称来放的，所以两个点都判断一下
+        //             continue;
+        //         }
+        //         if (r == (this.rows - 2) && c == 1) {
+        //             continue;
+        //         }
+        //         if (r == 1 && c == this.cols - 2) {
+        //             continue;
+        //         }
+        //         g[r][c] = g[this.rows - 1 - r][this.cols - 1 - c] = true;
+        //         break;
+        //     }
+        // }
 
 
-        //判断是否联通
-        const copy_g = JSON.parse(JSON.stringify(g));//生成一个g的复制，生成方法是先json化再解析json。
-        if (!this.check_connnectivity(copy_g, this.rows - 2, 1, 1, this.cols - 2)) {
-            return false;
-        }
+        // //判断是否联通
+        // const copy_g = JSON.parse(JSON.stringify(g));//生成一个g的复制，生成方法是先json化再解析json。
+        // if (!this.check_connnectivity(copy_g, this.rows - 2, 1, 1, this.cols - 2)) {
+        //     return false;
+        // }
 
+        const g = this.store.state.pk.gamemap;
 
         //给障碍物上色
 
