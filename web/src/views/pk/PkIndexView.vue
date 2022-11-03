@@ -47,7 +47,8 @@ export default {
                         username: data.opponent_username,
                         photo: data.opponent_photo,
                     });
-                    store.commit("updateStatus", "playing");
+                    setTimeout(() => store.commit("updateStatus", "playing"), 2000);
+
                 }
                 // console.log(data);
             }
@@ -57,6 +58,7 @@ export default {
         })
         onUnmounted(() => {
             socket.close();//如果在卸载的时候没有断开连接，那么每次打开这个页面都会新建一个连接。产生很多冗余连接
+            store.commit("updateStatus", "matching");//如果切换界面，那么status就变为matching
         })
     }
 }
