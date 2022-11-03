@@ -48,7 +48,7 @@ export default {
                         photo: data.opponent_photo,
                     });
                     setTimeout(() => store.commit("updateStatus", "playing"), 2000);
-                    store.commit("updateGamemap", data.gamemap);
+                    store.commit("updateGame", data.game);
                 }
                 // console.log(data);
             }
