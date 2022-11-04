@@ -1,10 +1,8 @@
 package com.kob.backend.consumer;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.kob.backend.consumer.utils.Game;
 import com.kob.backend.consumer.utils.JwtAuthentication;
-import com.kob.backend.consumer.utils.Player;
 import com.kob.backend.mapper.UserMapper;
 import com.kob.backend.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +22,17 @@ public class WebSocketServer {
 
     /*需要使用线程安全的哈希表去存放公共的变量，公共的变量使用static */
     /* users 存储 用户-链接 之间的对应关系*/
-    private final static ConcurrentHashMap<Integer, WebSocketServer> users = new ConcurrentHashMap<>();
+    public final static ConcurrentHashMap<Integer, WebSocketServer> users = new ConcurrentHashMap<>();
 
     /*匹配池 */
     private final static CopyOnWriteArraySet<User> matchpool = new CopyOnWriteArraySet<>();
 
     private Game game = null;//导入属于两位玩家的地图
+
+
+
+
+
 
     private User user;
 
@@ -88,6 +91,11 @@ public class WebSocketServer {
 
             Game game = new Game(13, 14, 20,a.getId(),b.getId());
             game.createMap();
+            users.get(a.getId()).game=game;
+            users.get(b.getId()).game=game;
+
+            game.start();
+
 
             JSONObject respGame=new JSONObject();
             respGame.put("a_id",game.getPlayerA().getId());
@@ -121,6 +129,16 @@ public class WebSocketServer {
         matchpool.remove(this.user);
     }
 
+    private void move(Integer direction){
+        if(game.getPlayerA().getId().equals(user.getId())){
+            game.setNextStepA(direction);
+        }
+        else if(game.getPlayerB().getId().equals(user.getId())){
+            game.setNextStepB(direction);
+        }
+    }
+
+
     @OnMessage
     public void onMessage(String message, Session session) {
         //作为路由来用，判断交给谁去处理。
@@ -132,6 +150,9 @@ public class WebSocketServer {
             startMatching();
         } else if ("stop-matching".equals(event)) {
             stopMatching();
+        }
+        else if("move".equals(event)){
+            move(data.getInteger("direction"));
         }
 
         System.out.println("receive message");
@@ -153,4 +174,7 @@ public class WebSocketServer {
             }
         }
     }
+
+
+
 }

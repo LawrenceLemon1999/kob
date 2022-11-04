@@ -47,7 +47,7 @@ export default {
                         username: data.opponent_username,
                         photo: data.opponent_photo,
                     });
-                    setTimeout(() => store.commit("updateStatus", "playing"), 2000);
+                    setTimeout(() => store.commit("updateStatus", "playing"), 1000);
                     store.commit("updateGame", data.game);
                 }
                 // console.log(data);

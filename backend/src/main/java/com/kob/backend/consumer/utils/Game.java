@@ -1,9 +1,13 @@
 package com.kob.backend.consumer.utils;
 
+import com.alibaba.fastjson.JSONObject;
+import com.kob.backend.consumer.WebSocketServer;
+
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class Game {
+public class Game extends Thread{
     private final Integer rows;
     private final Integer cols;
     private final Integer inner_walls_count;
@@ -12,7 +16,15 @@ public class Game {
 
     private final Player playerA, playerB;
 
-    public Game(Integer rows, Integer cols, Integer inner_walls_count,Integer idA,Integer idB) {
+    private Integer nextStepA=null;//两名玩家的下一步操作
+    private Integer nextStepB=null;
+    private ReentrantLock lock=new ReentrantLock();
+
+    private String status ="playing";//playing -> finished
+    private String loser="";//all:"平局"，A：A输  B：B输
+
+
+    public Game(Integer rows, Integer cols, Integer inner_walls_count,Integer idA,Integer idB)  {
         this.rows = rows;
         this.cols = cols;
         this.inner_walls_count = inner_walls_count;
@@ -92,5 +104,117 @@ public class Game {
             if (draw())
                 break;
         }
+    }
+
+    private void judge(){//判断两名玩家下一步操作是否合法
+
+    }
+
+    private void sendMove(){//向两个Client传递移动信息。
+        lock.lock();
+        try {
+            JSONObject resp=new JSONObject();
+            resp.put("event","move");
+            resp.put("a_direction",nextStepA);//存入玩家a,b的下一步操作
+            resp.put("b_direction",nextStepB);
+            nextStepA=null;
+            nextStepB=null;//读取之后就要清空
+            sendAllMessage(resp.toJSONString());
+        }finally {
+            lock.unlock();
+        }
+    }
+
+    private void sendResult(){//向两个Client公布结果
+        JSONObject resp=new JSONObject();
+        resp.put("event","result");
+        resp.put("loser",loser);
+        sendAllMessage(resp.toJSONString());
+    }
+
+    private void sendAllMessage(String message){//通用的传递消息的函数。
+        WebSocketServer.users.get(playerA.getId()).sendMessage(message);
+        WebSocketServer.users.get(playerB.getId()).sendMessage(message);
+    }
+
+    @Override
+    public void run(){
+        for(int i=0;i<1000;i++){
+            if(nextStep()){//是否获取了两条蛇的下一步操作。
+                judge();
+                if(status.equals("playing")){
+                    sendMove();
+                }
+                else{//如果已经不在playing了，说明对局已结束，可以向玩家传输结果了。
+                    sendResult();
+                    break;
+                }
+            }
+            else{
+                lock.lock();
+                try {
+                    status="finished";
+                    if(nextStepA==null &&nextStepB==null){
+                        loser="all";
+                    }
+                    else if(nextStepA==null){
+                        loser="A";
+                    }
+                    else{
+                        loser="B";
+                    }
+                }finally {
+                    lock.unlock();
+                }
+                sendResult();
+                break;
+            }
+        }
+    }
+
+
+    public void setNextStepA(Integer nextStepA) {
+        lock.lock();
+        try{
+            this.nextStepA = nextStepA;
+        }finally {
+            lock.unlock();
+        }
+    }
+
+    public void setNextStepB(Integer nextStepB) {
+        lock.lock();
+        try {
+            this.nextStepB = nextStepB;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private boolean nextStep(){//等待两名玩家的下一步动作
+
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        for(int i=0;i<5;i++){
+            try {
+                Thread.sleep(1000);
+                lock.lock();
+                try {
+                    if(nextStepA!=null&&nextStepB!=null){
+                        playerA.steps.add(nextStepA);
+                        playerB.steps.add(nextStepB);
+                        return true;
+                    }
+                }finally {
+                    lock.unlock();
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
     }
 }
